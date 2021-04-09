@@ -4,6 +4,7 @@
 	<head>
 		<title></title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="metronome.png">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
@@ -23,6 +24,9 @@
                 position: fixed;
                 bottom: 40vh;
             }
+            .form-range {
+                padding-top: 16px;
+            }
             #metronome {
                 width: fit-content;
                 min-width: 190px;
@@ -37,7 +41,10 @@
                 
                 let interval;
 
-                startStop.onclick = function() {
+                const range = document.querySelector('.form-range');
+                const input = document.querySelector('#bpm');
+
+                const playMetronome = () => {
                     const input = document.querySelector('#bpm');
                     let bpm = input.value;
                     const alert = document.querySelector('.alert');
@@ -57,16 +64,16 @@
                     let tempo = 60000 / bpm;
                     if(!isPlaying) {
                         click.play();
-                        this.innerText = 'Stop';
-                        this.className = 'btn btn-danger';
+                        startStop.innerText = 'Stop';
+                        startStop.className = 'btn btn-danger';
                         interval = setInterval(function() {
                             click.currentTime = 0;
                             click.play();
                         }, tempo);
                         isPlaying = true;
                     } else {
-                        this.innerText = 'Play';
-                        this.className = 'btn btn-primary';
+                        startStop.innerText = 'Play';
+                        startStop.className = 'btn btn-primary';
                         clearInterval(interval);
                         click.pause();
                         click.currentTime = 0;
@@ -74,7 +81,39 @@
                     }
                 }
 
+                function changeTempo(bpm) {
+                    input.value = bpm;
+                    range.value = bpm;
+                    if (isPlaying) {
+                        isPlaying = false;
+                        clearInterval(interval);
+                        playMetronome();
+                    }
+                }
+                
+                startStop.onclick = playMetronome;
+                
+                range.onchange = () => {
+                    input.value = range.value;
+                    if(isPlaying) {
+                        isPlaying = false;
+                        clearInterval(interval);
+                        playMetronome();
+                    }
+                }
+
+                input.onchange = () => {
+                    range.value = input.value;
+                    if(isPlaying) {
+                        isPlaying = false;
+                        clearInterval(interval);
+                        playMetronome();
+                    }
+                }
+
+                
             })
+
         </script>
 	</head>
 	<body>
@@ -85,7 +124,7 @@
                 <input id="bpm" class="form-control" type="number" min="20" max="300" value="120">
                 <button class="btn btn-primary" id="start-stop">Play</button>
             </div>
-            <div id="light"></div>
+            <input onchange="changeTempo()" class="form-range" type="range" min="20" max="300" value="120">
         </div>
         <div class="alert alert-warning" style="display: none;"></div>
 
